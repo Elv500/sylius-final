@@ -19,7 +19,9 @@ Encore
     .cleanupOutputBeforeBuild()
     .enableSourceMaps(!Encore.isProduction())
     .enableVersioning(Encore.isProduction())
-    .enableSassLoader();
+    .enableSassLoader()
+    .enableStimulusBridge(path.resolve(__dirname, './assets/shop/controllers.json'))
+;
 
 const appShopConfig = Encore.getWebpackConfig();
 
@@ -37,7 +39,9 @@ Encore
     .cleanupOutputBeforeBuild()
     .enableSourceMaps(!Encore.isProduction())
     .enableVersioning(Encore.isProduction())
-    .enableSassLoader();
+    .enableSassLoader()
+    .enableStimulusBridge(path.resolve(__dirname, './assets/admin/controllers.json'))
+;
 
 const appAdminConfig = Encore.getWebpackConfig();
 
