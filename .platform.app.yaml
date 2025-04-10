@@ -65,7 +65,7 @@ web:
             passthru: true
             allow: false
             rules:
-                '\.(jpe?g|png|gif|svgz?)$':
+                '\.(jpe?g|png|gif|svgz?|webp)$':
                     allow: true
 
 variables:
