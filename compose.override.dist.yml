@@ -43,6 +43,9 @@ services:
         ports:
             - "3306:3306"
     nginx:
+        depends_on:
+            php:
+                condition: service_started
         volumes:
             - ./public:/srv/sylius/public:ro
             # if you develop on Linux, you may use a bind-mounted host directory instead
