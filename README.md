@@ -40,16 +40,39 @@ $ symfony serve
 $ open http://localhost:8000/
 ```
 
-For more detailed instruction please visit [installation chapter in our docs](https://docs.sylius.com/en/latest/book/installation/installation.html).
+For more detailed instruction about traditional way of running Sylius please visit [installation chapter in our docs](https://docs.sylius.com/the-book/sylius-ce-installation).
 
 ### Docker
 
-#### Development
+You can run Sylius and all associated infrastructure dependencies (PHP, Nginx, MySQL, Node) on your machine using only Docker containers. Make sure you have installed [Docker](https://docs.docker.com/get-docker/) on your local machine.
 
-Make sure you have installed [Docker](https://docs.docker.com/get-docker/) on your local machine.
-Execute `make init` in your favorite terminal and wait some time until the services will be ready.
-Then enter `localhost` in your browser or execute `open localhost` in your terminal.
+**Option 1: Get the latest release**
+```bash
+LATEST=$(curl -s https://api.github.com/repos/Sylius/Sylius-Standard/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+curl -L -o sylius-latest.zip https://github.com/Sylius/Sylius-Standard/archive/refs/tags/$LATEST.zip
+unzip sylius-latest.zip
+cd Sylius-Standard-*
+```
 
+**Option 2: List available versions**
+```bash
+curl -s https://api.github.com/repos/Sylius/Sylius-Standard/releases | grep '"tag_name"' | cut -d'"' -f4 | head -10
+```
+
+**Option 3: Get a specific version**
+```bash
+VERSION="v2.x.x"  # Replace with desired version
+curl -L -o sylius-$VERSION.zip https://github.com/Sylius/Sylius-Standard/archive/refs/tags/$VERSION.zip
+unzip sylius-$VERSION.zip
+cd Sylius-Standard-*
+```
+
+**Initialize the project (required for all options):**
+```bash
+make init
+```
+
+For more detailed instruction about Docker way of running Sylius please visit [Docker installation chapter in our docs](https://docs.sylius.com/getting-started-with-sylius/sylius-ce-installation-with-docker).
 
 ## Troubleshooting
 
