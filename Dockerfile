@@ -9,11 +9,12 @@ FROM php:8.3-fpm
 # Instalar dependencias del sistema y extensiones PHP
 # -----------------------------
 RUN apt-get update && apt-get install -y \
-    git unzip curl libicu-dev libpq-dev libxml2-dev libzip-dev libonig-dev libpng-dev libjpeg-dev libfreetype6-dev \
+    git unzip curl libicu-dev libpq-dev libxml2-dev libzip-dev libonig-dev libpng-dev libjpeg-dev libfreetype6-dev python3 \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install intl pdo pdo_mysql pdo_pgsql zip opcache gd exif mbstring \
     && pecl install apcu \
-    && docker-php-ext-enable apcu
+    && docker-php-ext-enable apcu \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # -----------------------------
 # Instalar Composer
@@ -26,7 +27,8 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 # -----------------------------
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
-    && npm install --global yarn
+    && npm install --global yarn \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # -----------------------------
 # Directorio de trabajo
@@ -39,16 +41,14 @@ WORKDIR /app
 COPY . .
 
 # -----------------------------
-# Instalar dependencias PHP con memoria ilimitada y assets
+# Instalar dependencias PHP sin ejecutar scripts para evitar errores de memoria
 # -----------------------------
-RUN php -d memory_limit=-1 /usr/bin/composer install --no-dev --optimize-autoloader
-RUN yarn install && yarn build || true
+RUN php -d memory_limit=-1 /usr/bin/composer install --no-dev --optimize-autoloader --no-scripts
 
 # -----------------------------
-# Limpiar cache de Symfony y generar cache de producción
+# Instalar dependencias JS y construir assets
 # -----------------------------
-RUN php -d memory_limit=-1 bin/console cache:clear --env=prod
-RUN php -d memory_limit=-1 bin/console cache:warmup --env=prod
+RUN yarn install && yarn build || true
 
 # -----------------------------
 # Variables de entorno por defecto
