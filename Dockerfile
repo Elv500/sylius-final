@@ -13,7 +13,8 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install intl pdo pdo_mysql pdo_pgsql zip opcache gd exif mbstring \
     && pecl install apcu \
-    && docker-php-ext-enable apcu
+    && docker-php-ext-enable apcu \
+    && rm -rf /var/lib/apt/lists/*
 
 # -----------------------------
 # Instalar Composer
@@ -22,7 +23,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
 # -----------------------------
-# Instalar Node.js y Yarn (para assets)
+# Instalar Node.js y Yarn
 # -----------------------------
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
@@ -32,21 +33,21 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 # Directorio de trabajo
 # -----------------------------
 WORKDIR /app
-
-# -----------------------------
-# Copiar todo el proyecto
-# -----------------------------
 COPY . .
 
 # -----------------------------
 # Instalar dependencias PHP y assets
 # -----------------------------
-# Composer con memoria ilimitada y sin prompts
-RUN php -d memory_limit=-1 /usr/bin/composer install \
-    --no-dev --optimize-autoloader --no-scripts --prefer-dist --no-interaction
-
-# Instalar y construir assets
+RUN php -d memory_limit=-1 /usr/bin/composer install --no-dev --optimize-autoloader --no-scripts
 RUN yarn install && yarn build || true
+
+# -----------------------------
+# Ejecutar migraciones, fixtures y cache de Symfony
+# -----------------------------
+RUN php bin/console doctrine:migrations:migrate --no-interaction
+RUN php bin/console sylius:fixtures:load --no-interaction
+RUN php bin/console cache:clear --env=prod
+RUN php bin/console cache:warmup --env=prod
 
 # -----------------------------
 # Variables de entorno por defecto
