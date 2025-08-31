@@ -19,8 +19,6 @@ RUN apt-get update && apt-get install -y \
 # Instalar Composer
 # -----------------------------
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
-# Permitir que Composer ejecute scripts como root
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
 # -----------------------------
@@ -41,10 +39,16 @@ WORKDIR /app
 COPY . .
 
 # -----------------------------
-# Instalar dependencias PHP y assets
+# Instalar dependencias PHP con memoria ilimitada y assets
 # -----------------------------
-RUN composer install --no-dev --optimize-autoloader
+RUN php -d memory_limit=-1 /usr/bin/composer install --no-dev --optimize-autoloader
 RUN yarn install && yarn build || true
+
+# -----------------------------
+# Limpiar cache de Symfony y generar cache de producción
+# -----------------------------
+RUN php -d memory_limit=-1 bin/console cache:clear --env=prod
+RUN php -d memory_limit=-1 bin/console cache:warmup --env=prod
 
 # -----------------------------
 # Variables de entorno por defecto
